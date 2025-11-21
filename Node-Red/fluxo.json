@@ -1,0 +1,422 @@
+[
+    {
+        "id": "282bdd644feca478",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "mqtt_in_temp",
+        "type": "mqtt in",
+        "z": "282bdd644feca478",
+        "name": "Receber temperatura",
+        "topic": "giovanna/sensor/temperatura",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "broker1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 240,
+        "y": 1740,
+        "wires": [
+            [
+                "function_control",
+                "ui_temp"
+            ]
+        ]
+    },
+    {
+        "id": "function_control",
+        "type": "function",
+        "z": "282bdd644feca478",
+        "name": "Controle do ventilador",
+        "func": "let temp = parseFloat(msg.payload);\nlet comando = \"\";\n\n// Controle com histerese\nif (temp > 25) {\n    comando = \"ON\";\n} else if (temp < 24) {\n    comando = \"OFF\";\n}\n\n// Envia comando ao próximo nó\nmsg.payload = comando;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1740,
+        "wires": [
+            [
+                "mqtt_out_fan",
+                "ui_fan"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_out_fan",
+        "type": "mqtt out",
+        "z": "282bdd644feca478",
+        "name": "Enviar comando ao ESP32",
+        "topic": "giovanna/atuador/ventilador",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "broker1",
+        "x": 800,
+        "y": 1740,
+        "wires": []
+    },
+    {
+        "id": "ui_fan",
+        "type": "ui_text",
+        "z": "282bdd644feca478",
+        "group": "ui_group1",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Status Ventilador",
+        "label": "Ventilador:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 1900,
+        "wires": []
+    },
+    {
+        "id": "ui_temp",
+        "type": "ui_gauge",
+        "z": "282bdd644feca478",
+        "name": "Temperatura",
+        "group": "ui_group1",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temperatura (°C)",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 50,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 510,
+        "y": 1820,
+        "wires": []
+    },
+    {
+        "id": "mqtt_temp",
+        "type": "mqtt in",
+        "z": "282bdd644feca478",
+        "name": "Temperatura",
+        "topic": "giovanna/leito1/temperatura",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 1110,
+        "y": 1660,
+        "wires": [
+            [
+                "gauge_temp",
+                "chart_temp",
+                "lcd_text",
+                "fan_logic"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_umid",
+        "type": "mqtt in",
+        "z": "282bdd644feca478",
+        "name": "Umidade",
+        "topic": "giovanna/leito1/umidade",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 1100,
+        "y": 1720,
+        "wires": [
+            [
+                "text_umid"
+            ]
+        ]
+    },
+    {
+        "id": "gauge_temp",
+        "type": "ui_gauge",
+        "z": "282bdd644feca478",
+        "name": "Gauge Temperatura",
+        "group": "grupo1",
+        "order": 1,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "Temperatura do Quarto",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": 15,
+        "max": 40,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 1410,
+        "y": 1640,
+        "wires": []
+    },
+    {
+        "id": "text_umid",
+        "type": "ui_text",
+        "z": "282bdd644feca478",
+        "group": "grupo1",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "name": "",
+        "label": "Umidade",
+        "format": "{{msg.payload}} %",
+        "layout": "row-spread",
+        "x": 1400,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "chart_temp",
+        "type": "ui_chart",
+        "z": "282bdd644feca478",
+        "name": "Histórico de Temperatura",
+        "group": "grupo1",
+        "order": 3,
+        "width": 12,
+        "height": 4,
+        "label": "Histórico de Temperatura",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "15",
+        "ymax": "40",
+        "removeOlder": 10,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4"
+        ],
+        "outputs": 1,
+        "x": 1430,
+        "y": 1680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fan_logic",
+        "type": "function",
+        "z": "282bdd644feca478",
+        "name": "Lógica Automática",
+        "func": "let temp = parseFloat(msg.payload);\n\nif(temp > 25) {\n    return { payload: \"ON\" };\n}\nif(temp <= 24) {\n    return { payload: \"OFF\" };\n}\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1420,
+        "y": 1760,
+        "wires": [
+            [
+                "mqtt_cmd",
+                "fan_status"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_cmd",
+        "type": "mqtt out",
+        "z": "282bdd644feca478",
+        "name": "Cmd Ventilador → ESP32",
+        "topic": "giovanna/leito1/ventilador",
+        "qos": "",
+        "retain": "",
+        "broker": "mqtt_broker",
+        "x": 1730,
+        "y": 1760,
+        "wires": []
+    },
+    {
+        "id": "fan_status",
+        "type": "ui_text",
+        "z": "282bdd644feca478",
+        "group": "grupo1",
+        "order": 5,
+        "width": 6,
+        "height": 1,
+        "name": "",
+        "label": "Ventilador",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 1710,
+        "y": 1800,
+        "wires": []
+    },
+    {
+        "id": "lcd_text",
+        "type": "ui_text",
+        "z": "282bdd644feca478",
+        "group": "grupo1",
+        "order": 6,
+        "width": 6,
+        "height": 1,
+        "name": "LCD Virtual",
+        "label": "LCD",
+        "format": "Temp: {{msg.payload}} °C",
+        "layout": "row-spread",
+        "x": 1410,
+        "y": 1800,
+        "wires": []
+    },
+    {
+        "id": "ui_on",
+        "type": "ui_button",
+        "z": "282bdd644feca478",
+        "name": "",
+        "group": "grupo1",
+        "order": 7,
+        "width": 3,
+        "height": 1,
+        "passthru": false,
+        "label": "Ligar Ventilador",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "ON",
+        "topic": "",
+        "x": 1380,
+        "y": 1860,
+        "wires": [
+            [
+                "mqtt_cmd"
+            ]
+        ]
+    },
+    {
+        "id": "ui_off",
+        "type": "ui_button",
+        "z": "282bdd644feca478",
+        "name": "",
+        "group": "grupo1",
+        "order": 8,
+        "width": 3,
+        "height": 1,
+        "label": "Desligar Ventilador",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "OFF",
+        "topic": "",
+        "x": 1390,
+        "y": 1900,
+        "wires": [
+            [
+                "mqtt_cmd"
+            ]
+        ]
+    },
+    {
+        "id": "broker1",
+        "type": "mqtt-broker",
+        "name": "Mosquitto",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "NodeRED-Giovanna",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closePayload": "",
+        "willTopic": "",
+        "willPayload": ""
+    },
+    {
+        "id": "ui_group1",
+        "type": "ui_group",
+        "name": "Monitor Hospitalar",
+        "tab": "ui_tab1",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "Mosquitto",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false
+    },
+    {
+        "id": "grupo1",
+        "type": "ui_group",
+        "name": "Leito 1",
+        "tab": "aba1",
+        "order": 1,
+        "disp": true,
+        "width": 12
+    },
+    {
+        "id": "ui_tab1",
+        "type": "ui_tab",
+        "name": "Leito 1",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "aba1",
+        "type": "ui_tab",
+        "name": "Monitor Hospitalar",
+        "icon": "dashboard"
+    },
+    {
+        "id": "6a763266c90ff41c",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
